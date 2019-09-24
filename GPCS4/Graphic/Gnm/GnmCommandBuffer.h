@@ -5,10 +5,12 @@
 #include "GnmStructure.h"
 #include "GnmSharpBuffer.h"
 
+#include "../Gve/GveContext.h"
+
 class GnmCommandBuffer
 {
 public:
-	GnmCommandBuffer();
+	GnmCommandBuffer(RcPtr<gve::GveContex>& context);
 	virtual ~GnmCommandBuffer();
 
 	// Implement these one by one...
@@ -18,6 +20,8 @@ public:
 	// Uncomment the method here,
 	// then add the override(implementation) version
 	// to either GnmCommandBufferDraw or GnmCommandBufferDispatch
+	// and fill in param structures or constant in GnmContant.h or GnmStructure.h or other source files
+	// at the same time.
 
 	//virtual void *allocateFromCommandBuffer(uint32_t sizeInBytes, EmbeddedDataAlignment alignment) = 0;
 	//virtual void chainCommandBufferAndResume(uint64_t holeAddr, void *nextIbBaseAddr, uint64_t nextIbSizeInDW) = 0;
@@ -317,6 +321,9 @@ public:
 	//static bool isDispatchDrawAcbSubmitMarker(uint32_t const *pAcbSubmitMarker);
 	//static bool readDispatchDrawAcbSubmitMarker(uint32_t const *pAcbSubmitMarker, uint32_t *out_pSizeofAcbSegment, uint32_t *out_pPipe, uint32_t *out_pQueue, void const** out_ppAcbSegmentNext);
 
+protected:
+	RcPtr<gve::GveContex> m_context;
+	
 private:
 
 };

@@ -35,26 +35,21 @@ SceGnmDriver::~SceGnmDriver()
 {
 	m_commandBuffers.clear();
 	m_commandParsers.clear();
+	m_frameBuffers.clear();
+	m_contexts.clear();
 }
 
 bool SceGnmDriver::initDriver(uint32_t bufferNum)
 {
-	// Initialize command buffers and command parsers
-	// according to bufferNum
-	m_commandBuffers.resize(bufferNum);
-	for (auto& cmd : m_commandBuffers)
-	{
-		cmd = std::make_shared<GnmCommandBufferDraw>();
-	}
-
-	m_commandParsers.resize(bufferNum);
-	for (uint32_t i = 0; i != bufferNum; ++i)
-	{
-		m_commandParsers[i] = std::make_unique<GnmCmdStream>(m_commandBuffers[i]);
-	}
-
-	// Create our swapchain
+	
 	m_swapchain = new GveSwapChain(m_device, m_videoOut, bufferNum);
+
+	createFrameBuffers(bufferNum);
+
+	createContexts(bufferNum);
+
+	createCommandParsers(bufferNum);
+
 	return true;
 }
 
@@ -70,6 +65,8 @@ int SceGnmDriver::submitAndFlipCommandBuffers(uint32_t count,
 		LOG_ASSERT(count == 1, "Currently only support only 1 cmdbuff.");
 
 		auto& cmdParser = m_commandParsers[displayBufferIndex];
+		GnmCommandBuffer* gnmCmd = cmdParser->getCommandBuffer().get();
+
 		if (!cmdParser->processCommandBuffer((uint32_t*)dcbGpuAddrs[0], dcbSizesInBytes[0]))
 		{
 			break;
@@ -139,6 +136,49 @@ bool SceGnmDriver::checkDeviceExtensionSupport(RcPtr<gve::GvePhysicalDevice>& de
 	}
 
 	return requiredExtensions.empty();
+}
+
+void SceGnmDriver::createFrameBuffers(uint32_t count)
+{
+	VkExtent2D extent = m_swapchain->extent();
+
+	GveRenderPassFormat format;
+	format.swapChainImageFormat = m_swapchain->imageFormat();
+	auto renderPass = m_device->createRenderPass(format);
+
+	for (uint32_t i = 0; i != count; ++i)
+	{
+		auto imageView = m_swapchain->getImageView(i);
+		auto frameBuffer = m_device->createFrameBuffer(renderPass->handle(), imageView, extent);
+		m_frameBuffers.push_back(frameBuffer);
+	}
+}
+
+void SceGnmDriver::createContexts(uint32_t count)
+{
+	for (uint32_t i = 0; i != count; ++i)
+	{
+		auto context = m_device->createContext();
+		m_contexts.push_back(context);
+	}
+}
+
+void SceGnmDriver::createCommandParsers(uint32_t count)
+{
+	// Initialize command buffers and command parsers
+	// according to bufferNum
+	m_commandBuffers.resize(count);
+	for (uint32_t i = 0; i != count; ++i)
+	{
+		gve::GveRenderTarget target = { m_frameBuffers[i] };
+		m_commandBuffers[i] = std::make_shared<GnmCommandBufferDraw>(m_contexts[i], target);
+	}
+	
+	m_commandParsers.resize(count);
+	for (uint32_t i = 0; i != count; ++i)
+	{
+		m_commandParsers[i] = std::make_unique<GnmCmdStream>(m_commandBuffers[i]);
+	}
 }
 
 }  //sce

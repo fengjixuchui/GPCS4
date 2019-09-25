@@ -19,6 +19,10 @@ public:
 	GveContex(const RcPtr<GveDevice>& device);
 	~GveContex();
 
+	void initState();
+
+	void submit();
+
 private:
 	RcPtr<GveDevice> m_device;
 	RcPtr<GveCommandBuffer> m_command;

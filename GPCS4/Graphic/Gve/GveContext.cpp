@@ -18,4 +18,14 @@ GveContex::~GveContex()
 
 }
 
+void GveContex::initState()
+{
+	m_command->beginRecording();
+}
+
+void GveContex::submit()
+{
+	m_command->endRecording();
+}
+
 } // namespace gve

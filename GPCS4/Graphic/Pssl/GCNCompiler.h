@@ -4,6 +4,7 @@
 #include "PsslProgramInfo.h"
 #include "PsslFetchShader.h"
 #include "GCNInstruction.h"
+#include "GCNAnalyzer.h"
 
 #include "GCNParser/SMRDInstruction.h"
 #include "GCNParser/SOPPInstruction.h"
@@ -78,15 +79,15 @@ struct PsslArrayType
 struct GcnStateRegister
 {
 	// local data share
-	uint64_t lds;
+	uint64_t lds = 0;
 	// exec mask
-	uint64_t exec;
+	uint64_t exec = 0;
 	// vector condition code
-	uint64_t vcc;
+	uint64_t vcc = 0;
 	// mode register
-	uint32_t mode;
+	uint32_t mode = 0;
 	// memory descriptor register
-	uint32_t m0;
+	uint32_t m0 = 0;
 };
 
 /**
@@ -144,8 +145,8 @@ struct GcnCompilerCsPart {
 class GCNCompiler
 {
 public:
-	GCNCompiler(const PsslProgramInfo& progInfo);
-	GCNCompiler(const PsslProgramInfo& progInfo, const std::vector<VertexInputSemantic>& inputSemantic);
+	GCNCompiler(const PsslProgramInfo& progInfo, const GcnAnalysisInfo& analysis);
+	GCNCompiler(const PsslProgramInfo& progInfo, const GcnAnalysisInfo& analysis, const std::vector<VertexInputSemantic>& inputSemantic);
 	~GCNCompiler();
 
 	void processInstruction(GCNInstruction& ins);
@@ -160,6 +161,9 @@ private:
 	std::vector<VertexInputSemantic> m_vsInputSemantic;
 
 	SpirvModule m_module;
+
+	// Global analyze information
+	const GcnAnalysisInfo* m_analysis;
 
 	///////////////////////////////////////////////////
 	// Entry point description - we'll need to declare
@@ -186,10 +190,15 @@ private:
 	GcnCompilerPsPart m_ps;
 	GcnCompilerCsPart m_cs;
 
+	///////////////////////////////////
+	// State registers
+	GcnStateRegister m_stateRegs;
+
 private:
 
 	void emitInit();
-
+	/////////////////////////////////
+	// Shader initialization methods
 	void emitVsInit();
 	void emitHsInit();
 	void emitDsInit();
@@ -197,12 +206,23 @@ private:
 	void emitPsInit();
 	void emitCsInit();
 
+	///////////////////////////////
+	// Shader finalization methods
+	void emitVsFinalize();
+	void emitHsFinalize();
+	void emitDsFinalize();
+	void emitGsFinalize();
+	void emitPsFinalize();
+	void emitCsFinalize();
+
 	void emitFunctionBegin(
 		uint32_t                entryPoint,
 		uint32_t                returnType,
 		uint32_t                funcType);
 
 	void emitFunctionEnd();
+
+	void emitMainFunctionBegin();
 
 	void emitFunctionLabel();
 

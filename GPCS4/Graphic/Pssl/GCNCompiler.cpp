@@ -13,22 +13,11 @@ constexpr uint32_t PerVertex_ClipDist = 2;
 
 GCNCompiler::GCNCompiler(
 	const PsslProgramInfo& progInfo, 
-	const GcnAnalysisInfo& analysis,
-	const std::vector<GcnResourceBuffer>& bufferResources):
-	GCNCompiler(progInfo, analysis, {}, bufferResources)
-{
-
-}
-
-GCNCompiler::GCNCompiler(
-	const PsslProgramInfo& progInfo, 
 	const GcnAnalysisInfo& analysis, 
-	const std::vector<VertexInputSemantic>& inputSemantic,
-	const std::vector<GcnResourceBuffer>& bufferResources):
+	const GcnShaderInput& shaderInput):
 	m_programInfo(progInfo),
 	m_analysis(&analysis),
-	m_vsInputSemantics(inputSemantic),
-	m_shaderResources(bufferResources)
+	m_shaderInput(shaderInput)
 {
 	// Declare an entry point ID. We'll need it during the
 	// initialization phase where the execution mode is set.
@@ -155,7 +144,7 @@ void GCNCompiler::emitVsInit()
 
 	// Main function of the vertex shader
 	m_vs.mainFunctionId = m_module.allocateId();
-	m_module.setDebugName(m_vs.mainFunctionId, "vs_main");
+	m_module.setDebugName(m_vs.mainFunctionId, "vsMain");
 
 	emitFunctionBegin(
 		m_vs.mainFunctionId,
@@ -277,17 +266,19 @@ void GCNCompiler::emitDclVertexInput()
 {
 	do 
 	{
-		if (m_vsInputSemantics.empty())
+		if (!m_shaderInput.vsInputSemantics.has_value())
 		{
 			break;
 		}
 
-		for (const auto& inputSemantic : m_vsInputSemantics)
+		for (const auto& inputSemantic : m_shaderInput.vsInputSemantics.value())
 		{
 			// TODO:
 			// Not sure if all vertex inputs are float type
-			auto inputReg = emitDclFloatVector(SpirvScalarType::Float32, inputSemantic.sizeInElements, spv::StorageClassInput);
+			auto inputReg = emitDclFloatVectorVar(SpirvScalarType::Float32, inputSemantic.sizeInElements, spv::StorageClassInput);
 			m_vs.vsInputs[inputSemantic.semantic] = inputReg;
+			m_module.setDebugName(inputReg.id, 
+				UtilString::Format("inParam%d", inputSemantic.semantic).c_str());
 
 			// Use semantic index for location, so vulkan code need to match.
 			m_module.decorateLocation(inputReg.id, inputSemantic.semantic);
@@ -307,7 +298,7 @@ void GCNCompiler::emitDclVertexOutput()
 	m_perVertexOut = m_module.newVar(perVertexPointerType, spv::StorageClassOutput);
 
 	m_entryPointInterfaces.push_back(m_perVertexOut);
-	m_module.setDebugName(m_perVertexOut, "vs_vertex_out");
+	m_module.setDebugName(m_perVertexOut, "vsVertexOut");
 
 	// Declare other vertex output.
 	// like normal or texture coordinate
@@ -322,10 +313,10 @@ void GCNCompiler::emitDclVertexOutput()
 				continue;
 			}
 
-			auto outVector = emitDclFloatVector(SpirvScalarType::Float32,
+			auto outVector = emitDclFloatVectorVar(SpirvScalarType::Float32,
 				expInfo.regIndices.size(),
 				spv::StorageClassOutput,
-				UtilString::Format("out_param%d", outLocation));
+				UtilString::Format("outParam%d", outLocation));
 			m_module.decorateLocation(outVector.id, outLocation);
 
 			m_vs.vsOutputs[expInfo.target] = outVector;
@@ -340,7 +331,7 @@ void GCNCompiler::emitEmuFetchShader()
 {
 	do 
 	{
-		if (m_vsInputSemantics.empty())
+		if (!m_shaderInput.vsInputSemantics.has_value())
 		{
 			break;
 		}
@@ -353,9 +344,9 @@ void GCNCompiler::emitEmuFetchShader()
 			m_module.defFunctionType(
 			m_module.defVoidType(), 0, nullptr));
 		emitFunctionLabel();
-		m_module.setDebugName(m_vs.fsFunctionId, "vs_fetch");
+		m_module.setDebugName(m_vs.fsFunctionId, "vsFetch");
 
-		for (const auto& inputSemantic : m_vsInputSemantics)
+		for (const auto& inputSemantic : m_shaderInput.vsInputSemantics.value())
 		{
 			for (uint32_t i = 0; i != inputSemantic.sizeInElements; ++i)
 			{
@@ -414,22 +405,24 @@ void GCNCompiler::emitDclUniformBuffer()
 	// but I just choose the UBO way first due to performance reason. Maybe need to change in the future.
 
 	uint32_t index = 0;
-	for (const auto& res : m_shaderResources)
+	for (const auto& res : m_shaderInput.resourceBuffer)
 	{
 		switch (res.type)
 		{
 		case SpirvResourceType::VSharp:
 		{
 			GnmBuffer* vsharpBuffer = reinterpret_cast<GnmBuffer*>(res.res.resource);
-			uint32_t arraySize = vsharpBuffer->stride;
+			uint32_t arraySize = vsharpBuffer->stride / sizeof(uint32_t);
 
 			uint32_t arrayId = m_module.defArrayTypeUnique(
 				m_module.defFloatType(32),
-				arraySize);
+				m_module.constu32(arraySize));
+			m_module.decorateArrayStride(arrayId, vsharpBuffer->stride);
 			uint32_t uboStuctId = m_module.defStructTypeUnique(1, &arrayId);
 			m_module.decorateBlock(uboStuctId);
 			m_module.memberDecorateOffset(uboStuctId, 0, 0);
 			m_module.setDebugName(uboStuctId, "UniformBufferObject");
+			m_module.setDebugMemberName(uboStuctId, 0, "data");
 
 			uint32_t uboPtrId = m_module.defPointerType(uboStuctId, spv::StorageClassUniform);
 			m_uboId = m_module.newVar(uboPtrId, spv::StorageClassUniform);
@@ -440,6 +433,7 @@ void GCNCompiler::emitDclUniformBuffer()
 			m_module.decorateBinding(m_uboId, index);
 
 			m_module.setDebugName(m_uboId, "ubo");
+			
 		}
 			break;
 		case SpirvResourceType::SSharp:
@@ -479,14 +473,25 @@ SpirvRegisterPointer GCNCompiler::emitDclFloat(SpirvScalarType type,
 	return SpirvRegisterPointer(type, 1, varId);
 }
 
-SpirvRegisterPointer GCNCompiler::emitDclFloatVector(SpirvScalarType type, uint32_t count,
+SpirvRegisterPointer GCNCompiler::emitDclFloatVectorType(SpirvScalarType type, uint32_t count,
 	spv::StorageClass storageCls, const std::string& debugName /*= ""*/)
 {
 	uint32_t width = type == SpirvScalarType::Float32 ? 32 : 64;
 	uint32_t fpTypeId = m_module.defFloatType(width);
 	uint32_t vfpTypeId = m_module.defVectorType(fpTypeId, count);
 	uint32_t vfpPtrTypeId = m_module.defPointerType(vfpTypeId, storageCls);
-	uint32_t varId = m_module.newVar(vfpPtrTypeId, storageCls);
+	
+	if (!debugName.empty())
+	{
+		m_module.setDebugName(vfpPtrTypeId, debugName.c_str());
+	}
+	return SpirvRegisterPointer(type, count, vfpPtrTypeId);
+}
+
+SpirvRegisterPointer GCNCompiler::emitDclFloatVectorVar(SpirvScalarType type, uint32_t count, spv::StorageClass storageCls, const std::string& debugName /*= ""*/)
+{
+	auto ptrType = emitDclFloatVectorType(type, count, storageCls, debugName);
+	uint32_t varId = m_module.newVar(ptrType.id, storageCls);
 	if (!debugName.empty())
 	{
 		m_module.setDebugName(varId, debugName.c_str());
@@ -562,6 +567,14 @@ void GCNCompiler::emitSgprStore(uint32_t dstIdx, const SpirvRegisterValue& srcRe
 	emitValueStore(sgpr, srcReg, 1);
 }
 
+void GCNCompiler::emitSgprArrayStore(uint32_t startIdx, const SpirvRegisterValue* values, uint32_t count)
+{
+	for (uint32_t i = 0; i != count; ++i)
+	{
+		emitSgprStore(startIdx + i, values[i]);
+	}
+}
+
 void GCNCompiler::emitVgprStore(uint32_t dstIdx, const SpirvRegisterValue& srcReg)
 {
 	auto& vgpr = m_vgprs[dstIdx];
@@ -574,6 +587,14 @@ void GCNCompiler::emitVgprStore(uint32_t dstIdx, const SpirvRegisterValue& srcRe
 		m_module.setDebugName(vgpr.id, UtilString::Format("v%d", dstIdx).c_str());
 	}
 	emitValueStore(vgpr, srcReg, 1);
+}
+
+void GCNCompiler::emitVgprArrayStore(uint32_t startIdx, const SpirvRegisterValue* values, uint32_t count)
+{
+	for (uint32_t i = 0; i != count; ++i)
+	{
+		emitVgprStore(startIdx + i, values[i]);
+	}
 }
 
 // Used with with 7 bits SDST, 8 bits SSRC or 9 bits SRC
@@ -1124,7 +1145,7 @@ uint32_t GCNCompiler::getPerVertexBlockId()
 	m_module.decorateBlock(typeId);
 
 	m_module.setDebugName(typeId, "gl_PerVertex");
-	m_module.setDebugMemberName(typeId, PerVertex_Position, "Position");
+	m_module.setDebugMemberName(typeId, PerVertex_Position, "gl_Position");
 	//     m_module.setDebugMemberName(typeId, PerVertex_CullDist, "cull_dist");
 	//     m_module.setDebugMemberName(typeId, PerVertex_ClipDist, "clip_dist");
 	return typeId;

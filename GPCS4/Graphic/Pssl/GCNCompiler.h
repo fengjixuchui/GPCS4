@@ -136,17 +136,31 @@ struct SpirvGprArray
 
 
 /**
+ * \brief Sampler binding
+ *
+ * Stores a sampler variable that can be
+ * used together with a texture resource.
+ */
+struct SpirvSampler 
+{
+	uint32_t varId = 0;
+	uint32_t typeId = 0;
+};
+
+
+/**
  * \brief Sharp buffer resource.
  *
  * V# T# or S# buffer input to the shader
  */
 struct GcnResourceBuffer
 {
-	GcnResourceBuffer(SpirvResourceType resType, PsslShaderResource& resource):
-		type(resType), res(resource)
+	GcnResourceBuffer(SpirvResourceType rType, ShaderInputUsageType uType, PsslShaderResource& resource):
+		resType(rType), usageType(uType), res(resource)
 	{}
 
-	SpirvResourceType type;
+	SpirvResourceType resType;
+	ShaderInputUsageType usageType;
 	PsslShaderResource res;
 };
 
@@ -193,6 +207,15 @@ struct GcnCompilerVsPart
 	std::map<uint32_t, SpirvRegisterPointer> vsInputs;
 	// exp target -- spirv id
 	std::map<uint32_t, SpirvRegisterPointer> vsOutputs;
+
+	// Uniform Buffer Object Id
+	// TODO:
+	// Currently I see only one block of uniform buffer memory being used
+	// even if multiple uniform variables declared.
+	// So I only declare one member variable.
+	// If multiple blocks of uniform buffer are found in the future
+	// change this to a std::vector or something convinient.
+	uint32_t m_uboId = 0;
 };
 
 
@@ -202,20 +225,12 @@ struct GcnCompilerVsPart
 struct GcnCompilerPsPart 
 {
 	spv::Id functionId = 0;
-
-	uint32_t builtinFragCoord = 0;
-	uint32_t builtinDepth = 0;
-	uint32_t builtinIsFrontFace = 0;
-	uint32_t builtinSampleId = 0;
-	uint32_t builtinSampleMaskIn = 0;
-	uint32_t builtinSampleMaskOut = 0;
-	uint32_t builtinLayer = 0;
-	uint32_t builtinViewportId = 0;
-
-	uint32_t builtinLaneId = 0;
-	uint32_t killState = 0;
-
-	uint32_t specRsSampleCount = 0;
+	// attr index -- spirv id
+	std::map<uint32_t, SpirvRegisterPointer> psInputs;
+	// exp target -- spirv id
+	std::map<uint32_t, SpirvRegisterPointer> psOutputs;
+	// start register index -- sampler
+	std::map<uint32_t, SpirvSampler> samplers;
 };
 
 
@@ -288,15 +303,6 @@ private:
 	uint32_t m_perVertexIn = 0;
 	uint32_t m_perVertexOut = 0;
 
-	// Uniform Buffer Object Id
-	// TODO:
-	// Currently I see only one block of uniform buffer memory being used
-	// even if multiple uniform variables declared.
-	// So I only declare one member variable.
-	// If multiple blocks of uniform buffer are found in the future
-	// change this to a std::vector or something convinient.
-	uint32_t m_uboId;
-
 	//////////////////////////////////////////////
 	// Function state tracking. Required in order
 	// to properly end functions in some cases.
@@ -361,15 +367,19 @@ private:
 	void emitDclVertexOutput();
 	void emitEmuFetchShader();
 
+	void emitDclPixelInput();
+	void emitDclPixelOutput();
+
 	// For all shader types
 	void emitDclUniformBuffer();
-	void emitDclVsharpBuffer(const GcnResourceBuffer& res, uint32_t index);
-	void emitDclSsharpBuffer(const GcnResourceBuffer& res, uint32_t index);
+	void emitDclImmConstBuffer(const GcnResourceBuffer& res, uint32_t index);
+	void emitDclImmSampler(const GcnResourceBuffer& res, uint32_t index);
+	void emitDclImmResource(const GcnResourceBuffer& res, uint32_t index);
 
 	/////////////////////////////////////////////////////////
 	SpirvRegisterPointer emitDclFloat(SpirvScalarType type,
 		spv::StorageClass storageCls, const std::string& debugName = "");
-	SpirvRegisterPointer emitDclFloatVectorType(SpirvScalarType type, uint32_t count,
+	SpirvRegisterPointer emitDclFloatVectorPointer(SpirvScalarType type, uint32_t count,
 		spv::StorageClass storageCls, const std::string& debugName = "");
 	SpirvRegisterPointer emitDclFloatVectorVar(SpirvScalarType type, uint32_t count,
 		spv::StorageClass storageCls, const std::string& debugName = "");

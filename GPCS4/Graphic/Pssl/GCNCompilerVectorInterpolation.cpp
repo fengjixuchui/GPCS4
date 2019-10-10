@@ -31,7 +31,8 @@ void GCNCompiler::emitVectorInterpFpCache(GCNInstruction& ins)
 		// we just copy the already interpolated input value
 		// to the dst vgpr.
 		const auto& input = m_ps.psInputs[attr];
-		dstValue = emitVectorCompositeLoad(input, chan);
+		dstValue = emitVectorComponentLoad(input, chan);
+		
 	}
 		break;
 	case SIVINTRPInstruction::V_INTERP_MOV_F32:
@@ -40,7 +41,10 @@ void GCNCompiler::emitVectorInterpFpCache(GCNInstruction& ins)
 		break;
 	}
 
-	emitVgprStore(dst, dstValue);
+	if (dstValue.id != 0)  // For V_INTERP_P1_F32, we shouldn't store.
+	{
+		emitVgprStore(dst, dstValue);
+	}
 }
 
 

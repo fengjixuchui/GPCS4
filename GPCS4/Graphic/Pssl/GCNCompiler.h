@@ -429,12 +429,16 @@ private:
 	void emitSgprArrayStore(uint32_t startIdx, const SpirvRegisterValue* values, uint32_t count);
 	void emitVgprStore(uint32_t dstIdx, const SpirvRegisterValue& srcReg);
 	void emitVgprArrayStore(uint32_t startIdx, const SpirvRegisterValue* values, uint32_t count);
-	
+	// Store a vector to continuous vgprs
+	void emitVgprVectorStore(uint32_t startIdx, const SpirvRegisterValue& srcVec, const GcnRegMask& writeMask);
+
 	// load a vector's composite,
 	// 0 - x, 1 - y, 2 - z, 3 - w
-	SpirvRegisterValue emitVectorCompositeLoad(
+	SpirvRegisterValue emitVectorComponentLoad(
 		const SpirvRegisterPointer& srcVec,
 		uint32_t compIndex);
+
+	
 
 	/////////////////////////////////////////
 	// Operands manipulation methods

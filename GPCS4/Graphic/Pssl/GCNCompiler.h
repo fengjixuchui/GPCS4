@@ -377,56 +377,6 @@ public:
 
 private:
 
-	PsslProgramInfo m_programInfo;
-
-	SpirvModule m_module;
-
-	// Global analyze information
-	const GcnAnalysisInfo* m_analysis;
-
-	GcnShaderInput m_shaderInput;
-	///////////////////////////////////////////////////
-	// Entry point description - we'll need to declare
-	// the function ID and all input/output variables.
-	std::vector<uint32_t> m_entryPointInterfaces;
-	uint32_t              m_entryPointId = 0;
-
-	////////////////////////////////////////////////////
-	// Per-vertex input and output blocks. Depending on
-	// the shader stage, these may be declared as arrays.
-	uint32_t m_perVertexIn = 0;
-	uint32_t m_perVertexOut = 0;
-
-	//////////////////////////////////////////////
-	// Function state tracking. Required in order
-	// to properly end functions in some cases.
-	bool m_insideFunction = false;
-
-
-	///////////////////////////////////
-	// Shader-specific data structures
-	GcnCompilerVsPart m_vs;
-	GcnCompilerPsPart m_ps;
-	GcnCompilerCsPart m_cs;
-
-	///////////////////////////////////
-	// State registers
-	GcnStateRegister m_stateRegs;
-
-	///////////////////////////////////
-	// Gcn register to spir-v variable map
-	// gcn register index -- spirv register
-	std::map<uint32_t, SpirvRegisterPointer> m_sgprs;
-	std::map<uint32_t, SpirvRegisterPointer> m_vgprs;
-
-	///////////////////////////////////
-	// Resources
-
-	// spir-v id to literal constant value table
-	std::map<uint32_t, SpirvLiteralConstant> m_constValueTable;
-
-private:
-
 	void emitInit();
 	/////////////////////////////////
 	// Shader initialization methods
@@ -486,14 +436,6 @@ private:
 	void emitVgprArrayStore(uint32_t startIdx, const SpirvRegisterValue* values, uint32_t count);
 	// Store a vector to continuous vgprs
 	void emitVgprVectorStore(uint32_t startIdx, const SpirvRegisterValue& srcVec, const GcnRegMask& writeMask);
-
-	// load a vector's composite,
-	// 0 - x, 1 - y, 2 - z, 3 - w
-	SpirvRegisterValue emitVectorComponentLoad(
-		const SpirvRegisterPointer& srcVec,
-		uint32_t compIndex,
-		spv::StorageClass storageClass = spv::StorageClassPrivate);
-
 	
 
 	/////////////////////////////////////////
@@ -603,6 +545,13 @@ private:
 	SpirvRegisterValue emitRegisterMaskBits(
 		SpirvRegisterValue       value,
 		uint32_t                mask);
+
+	// load a vector's composite,
+	// 0 - x, 1 - y, 2 - z, 3 - w
+	SpirvRegisterValue emitRegisterComponentLoad(
+		const SpirvRegisterPointer&		srcVec,
+		uint32_t						compIndex,
+		spv::StorageClass				storageClass = spv::StorageClassPrivate);
 
 	/////////////////////////////////////////////////////////
 	// Category handlers
@@ -754,6 +703,57 @@ private:
 	{
 		return dynamic_cast<const InsType*>(ins.instruction.get());
 	}
+
+private:
+
+	PsslProgramInfo m_programInfo;
+
+	SpirvModule m_module;
+
+	// Global analyze information
+	const GcnAnalysisInfo* m_analysis;
+
+	GcnShaderInput m_shaderInput;
+	///////////////////////////////////////////////////
+	// Entry point description - we'll need to declare
+	// the function ID and all input/output variables.
+	std::vector<uint32_t> m_entryPointInterfaces;
+	uint32_t              m_entryPointId = 0;
+
+	////////////////////////////////////////////////////
+	// Per-vertex input and output blocks. Depending on
+	// the shader stage, these may be declared as arrays.
+	uint32_t m_perVertexIn = 0;
+	uint32_t m_perVertexOut = 0;
+
+	//////////////////////////////////////////////
+	// Function state tracking. Required in order
+	// to properly end functions in some cases.
+	bool m_insideFunction = false;
+
+
+	///////////////////////////////////
+	// Shader-specific data structures
+	GcnCompilerVsPart m_vs;
+	GcnCompilerPsPart m_ps;
+	GcnCompilerCsPart m_cs;
+
+	///////////////////////////////////
+	// State registers
+	GcnStateRegister m_stateRegs;
+
+	///////////////////////////////////
+	// Gcn register to spir-v variable map
+	// gcn register index -- spirv register
+	std::map<uint32_t, SpirvRegisterPointer> m_sgprs;
+	std::map<uint32_t, SpirvRegisterPointer> m_vgprs;
+
+	///////////////////////////////////
+	// Resources
+
+	// spir-v id to literal constant value table
+	std::map<uint32_t, SpirvLiteralConstant> m_constValueTable;
+
 };
 
 

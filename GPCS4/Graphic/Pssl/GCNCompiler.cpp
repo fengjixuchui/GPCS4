@@ -388,7 +388,7 @@ void GCNCompiler::emitEmuFetchShader()
 
 				// Access vector member
 				uint32_t fpPtrTypeId = getPointerTypeId(info);
-				auto element = emitVectorComponentLoad(input, i, spv::StorageClassInput);
+				auto element = emitRegisterComponentLoad(input, i, spv::StorageClassInput);
 
 				// Store input value to our new vgpr reg.
 				m_module.opStore(vgprId, element.id);
@@ -449,10 +449,12 @@ void GCNCompiler::emitGprInitialize()
 {
 	// TODO:
 	// For sgprs and vgprs, we should initialize them
-	// following the ISA manual 
+	// following the ISA manual:
 	// 7. Appendix: GPR Allocation and Initialization
-	//
-	// Currently I just initialize which I use.
+	// e.g. We could declare another uniform buffer to hold 
+	// the 16 user data registers.
+	// 
+	// Currently I just create which I use.
 
 	SpirvRegisterPointer s12;
 	s12.type.ctype = SpirvScalarType::Float32;
@@ -722,22 +724,6 @@ void GCNCompiler::emitVgprVectorStore(uint32_t startIdx, const SpirvRegisterValu
 
 		emitVgprStore(startIdx + i, value);
 	}
-}
-
-SpirvRegisterValue GCNCompiler::emitVectorComponentLoad(
-	const SpirvRegisterPointer& srcVec,
-	uint32_t compIndex,
-	spv::StorageClass storageClass /* = spv::StorageClassPrivate */)
-{
-	uint32_t typeId = getScalarTypeId(srcVec.type.ctype);
-	uint32_t ptrTypeId = m_module.defPointerType(typeId, storageClass);
-	uint32_t compositeIndexId = m_module.constu32(compIndex);
-	uint32_t compositePointer = m_module.opAccessChain(
-		ptrTypeId,
-		srcVec.id,
-		1, &compositeIndexId);
-	uint32_t valueId = m_module.opLoad(typeId, compositePointer);
-	return SpirvRegisterValue(srcVec.type.ctype, 1, valueId);
 }
 
 // Used with with 7 bits SDST, 8 bits SSRC or 9 bits SRC
@@ -1316,6 +1302,22 @@ SpirvRegisterValue GCNCompiler::emitRegisterMaskBits(SpirvRegisterValue value, u
 		getVectorTypeId(result.type),
 		value.id, maskVector.id);
 	return result;
+}
+
+SpirvRegisterValue GCNCompiler::emitRegisterComponentLoad(
+	const SpirvRegisterPointer& srcVec,
+	uint32_t compIndex,
+	spv::StorageClass storageClass /* = spv::StorageClassPrivate */)
+{
+	uint32_t typeId = getScalarTypeId(srcVec.type.ctype);
+	uint32_t ptrTypeId = m_module.defPointerType(typeId, storageClass);
+	uint32_t compositeIndexId = m_module.constu32(compIndex);
+	uint32_t compositePointer = m_module.opAccessChain(
+		ptrTypeId,
+		srcVec.id,
+		1, &compositeIndexId);
+	uint32_t valueId = m_module.opLoad(typeId, compositePointer);
+	return SpirvRegisterValue(srcVec.type.ctype, 1, valueId);
 }
 
 uint32_t GCNCompiler::getPerVertexBlockId()

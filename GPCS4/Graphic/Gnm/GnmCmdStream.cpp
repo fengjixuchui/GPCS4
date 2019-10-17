@@ -1,6 +1,6 @@
 #include "GnmCmdStream.h"
 #include "GnmGfx9MePm4Packets.h"
-
+#include "BitHelper.h"
 
 const uint32_t c_stageBases[kShaderStageCount] = { 0x2E40, 0x2C0C, 0x2C4C, 0x2C8C, 0x2CCC, 0x2D0C, 0x2D4C };
 
@@ -147,13 +147,13 @@ uint32_t GnmCmdStream::processPM4Type3(PPM4_TYPE_3_HEADER pm4Hdr, uint32_t* itBo
 	case IT_SET_CONFIG_REG:
 		onSetConfigReg(pm4Hdr, itBody);
 		break;
-	case IT_SET_CONTEXT_REG:
+	case IT_SET_CONTEXT_REG:  // 0x69
 		onSetContextReg(pm4Hdr, itBody);
 		break;
 	case IT_SET_SH_REG:
 		onSetShReg(pm4Hdr, itBody);
 		break;
-	case IT_SET_UCONFIG_REG:
+	case IT_SET_UCONFIG_REG:  // 0x79
 		onSetUconfigReg(pm4Hdr, itBody);
 		break;
 	case IT_INCREMENT_DE_COUNTER:
@@ -447,6 +447,38 @@ void GnmCmdStream::onSetContextReg(PPM4_TYPE_3_HEADER pm4Hdr, uint32_t* itBody)
 		const uint32_t* inputTable = &itBody[1];
 		const uint32_t numItems = pm4Hdr->count;
 		m_cb->setPsShaderUsage(inputTable, numItems);
+	}
+		break;
+	case OP_HINT_SET_VIEWPORT_TRANSFORM_CONTROL:
+	{
+		ViewportTransformControl vpc = { 0 };
+		vpc.reg = itBody[1];
+		m_cb->setViewportTransformControl(vpc);
+	}
+		break;
+	case OP_HINT_SET_SCREEN_SCISSOR:
+	{
+		int32_t left = bit::extract(itBody[1], 0, 15);
+		int32_t top = bit::extract(itBody[1], 16, 31);
+		int32_t right = bit::extract(itBody[2], 0, 15);
+		int32_t bottom = bit::extract(itBody[2], 16, 31);
+		m_cb->setScreenScissor(left, top, right, bottom);
+	}
+		break;
+	case OP_HINT_SET_HARDWARE_SCREEN_OFFSET:
+	{
+		uint32_t offsetX = bit::extract(itBody[1], 0, 15);
+		uint32_t offsetY = bit::extract(itBody[1], 16, 31);
+		m_cb->setHardwareScreenOffset(offsetX, offsetY);
+	}
+		break;
+	case OP_HINT_SET_GUARD_BANDS:
+	{
+		float horzClip = *reinterpret_cast<float*>(&itBody[1]);
+		float vertClip = *reinterpret_cast<float*>(&itBody[2]);
+		float horzDiscard = *reinterpret_cast<float*>(&itBody[3]);
+		float vertDiscard = *reinterpret_cast<float*>(&itBody[4]);
+		m_cb->setGuardBands(horzClip, vertClip, horzDiscard, vertDiscard);
 	}
 		break;
 	}

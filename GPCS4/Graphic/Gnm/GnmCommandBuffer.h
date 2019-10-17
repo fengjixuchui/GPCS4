@@ -152,8 +152,8 @@ public:
 	//virtual void setGsMode(GsMode mode, GsMaxOutputPrimitiveDwordSize maxPrimDwordSize) = 0;
 	//virtual void setGsOnChipControl(uint32_t esVerticesPerSubGroup, uint32_t gsInputPrimitivesPerSubGroup) = 0;
 	//virtual void setGsShader(const GsStageRegisters *gsRegs) = 0;
-	//virtual void setGuardBands(float horzClip, float vertClip, float horzDiscard, float vertDiscard) = 0;
-	//virtual void setHardwareScreenOffset(uint32_t offsetX, uint32_t offsetY) = 0;
+	virtual void setGuardBands(float horzClip, float vertClip, float horzDiscard, float vertDiscard) = 0;
+	virtual void setHardwareScreenOffset(uint32_t offsetX, uint32_t offsetY) = 0;
 	//virtual void setHsShader(const HsStageRegisters *hsRegs, const TessellationRegisters *tessRegs) = 0;
 	//virtual void setHsShader(const HsStageRegisters *hsRegs, const TessellationRegisters *tessRegs, TessellationDistributionMode distributionMode) = 0;
 	//virtual void setHtileStencil0(HtileStencilControl htileStencilControl) = 0;
@@ -195,7 +195,7 @@ public:
 	//virtual void setRenderTargetMask(uint32_t mask) = 0;
 	//virtual void setScaledResolutionGrid(const ScaledResolutionGridAxis xAxisLeftEye, const ScaledResolutionGridAxis xAxisRightEye, const ScaledResolutionGridAxis yAxisBothEyes) = 0;
 	//virtual void setScanModeControl(ScanModeControlAa msaa, ScanModeControlViewportScissor viewportScissor) = 0;
-	//virtual void setScreenScissor(int32_t left, int32_t top, int32_t right, int32_t bottom) = 0;
+	virtual void setScreenScissor(int32_t left, int32_t top, int32_t right, int32_t bottom) = 0;
 	virtual void setSsharpInUserData(ShaderStage stage, uint32_t startUserDataSlot, const GnmSampler *sampler) = 0;
 	//virtual void setStencilClearValue(uint8_t clearValue) = 0;
 	//virtual void setStencil(StencilControl stencilControl) = 0;
@@ -218,7 +218,7 @@ public:
 	virtual void setVgtControl(uint8_t primGroupSizeMinusOne, WdSwitchOnlyOnEopMode wdSwitchOnlyOnEopMode, VgtPartialVsWaveMode partialVsWaveMode) = 0;
 	virtual void setViewport(uint32_t viewportId, float dmin, float dmax, const float scale[3], const float offset[3]) = 0;
 	//virtual void setViewportScissor(uint32_t viewportId, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom, WindowOffsetMode windowOffsetEnable) = 0;
-	//virtual void setViewportTransformControl(ViewportTransformControl vportControl) = 0;
+	virtual void setViewportTransformControl(ViewportTransformControl vportControl) = 0;
 	virtual void setVsharpInUserData(ShaderStage stage, uint32_t startUserDataSlot, const GnmBuffer *buffer) = 0;
 	//virtual void setVsShaderStreamoutEnable(bool enable) = 0;
 	virtual void setVsShader(const pssl::VsStageRegisters *vsRegs, uint32_t shaderModifier) = 0;

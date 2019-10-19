@@ -23,9 +23,9 @@ public:
 
 	virtual void initializeDefaultHardwareState() override;
 
-	virtual void setVsharpInUserData(ShaderStage stage, uint32_t startUserDataSlot, const GnmBuffer *buffer) override;
-	virtual void setTsharpInUserData(ShaderStage stage, uint32_t startUserDataSlot, const GnmTexture *tex) override;
-	virtual void setSsharpInUserData(ShaderStage stage, uint32_t startUserDataSlot, const GnmSampler *sampler) override;
+	virtual void setVsharpInUserData(ShaderStage stage, uint32_t startUserDataSlot, const VSharpBuffer *buffer) override;
+	virtual void setTsharpInUserData(ShaderStage stage, uint32_t startUserDataSlot, const TSharpBuffer *tex) override;
+	virtual void setSsharpInUserData(ShaderStage stage, uint32_t startUserDataSlot, const SSharpBuffer *sampler) override;
 	virtual void setUserDataRegion(ShaderStage stage, uint32_t startUserDataSlot, const uint32_t *userData, uint32_t numDwords) override;
 	virtual void setPointerInUserData(ShaderStage stage, uint32_t startUserDataSlot, void *gpuAddr) override;
 
@@ -80,6 +80,27 @@ public:
 
 
 	virtual void setRenderTarget(uint32_t rtSlot, RenderTarget const *target) override;
+
+
+	virtual void setDepthRenderTarget(DepthRenderTarget const *depthTarget) override;
+
+
+	virtual void setRenderTargetMask(uint32_t mask) override;
+
+
+	virtual void setDepthStencilControl(DepthStencilControl depthControl) override;
+
+
+	virtual void setBlendControl(uint32_t rtSlot, BlendControl blendControl) override;
+
+
+	virtual void setPrimitiveSetup(PrimitiveSetup reg) override;
+
+
+	virtual void setActiveShaderStages(ActiveShaderStages activeStages) override;
+
+
+	virtual void setIndexSize(IndexSize indexSize, CachePolicy cachePolicy) override;
 
 private:
 	uint32_t* getFetchShaderCode(void* vsCode);

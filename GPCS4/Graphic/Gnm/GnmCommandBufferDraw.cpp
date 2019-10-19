@@ -62,17 +62,17 @@ void GnmCommandBufferDraw::setVgtControl(uint8_t primGroupSizeMinusOne, WdSwitch
 	
 }
 
-void GnmCommandBufferDraw::setVsharpInUserData(ShaderStage stage, uint32_t startUserDataSlot, const GnmBuffer *buffer)
+void GnmCommandBufferDraw::setVsharpInUserData(ShaderStage stage, uint32_t startUserDataSlot, const VSharpBuffer *buffer)
 {
 
 }
 
-void GnmCommandBufferDraw::setTsharpInUserData(ShaderStage stage, uint32_t startUserDataSlot, const GnmTexture *tex)
+void GnmCommandBufferDraw::setTsharpInUserData(ShaderStage stage, uint32_t startUserDataSlot, const TSharpBuffer *tex)
 {
 
 }
 
-void GnmCommandBufferDraw::setSsharpInUserData(ShaderStage stage, uint32_t startUserDataSlot, const GnmSampler *sampler)
+void GnmCommandBufferDraw::setSsharpInUserData(ShaderStage stage, uint32_t startUserDataSlot, const SSharpBuffer *sampler)
 {
 
 }
@@ -168,20 +168,55 @@ void GnmCommandBufferDraw::setViewportTransformControl(ViewportTransformControl 
 
 void GnmCommandBufferDraw::setScreenScissor(int32_t left, int32_t top, int32_t right, int32_t bottom)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+
 }
 
 void GnmCommandBufferDraw::setGuardBands(float horzClip, float vertClip, float horzDiscard, float vertDiscard)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+
 }
 
 void GnmCommandBufferDraw::setHardwareScreenOffset(uint32_t offsetX, uint32_t offsetY)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+
 }
 
 void GnmCommandBufferDraw::setRenderTarget(uint32_t rtSlot, RenderTarget const *target)
+{
+
+}
+
+void GnmCommandBufferDraw::setDepthRenderTarget(DepthRenderTarget const *depthTarget)
+{
+
+}
+
+void GnmCommandBufferDraw::setRenderTargetMask(uint32_t mask)
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}
+
+void GnmCommandBufferDraw::setDepthStencilControl(DepthStencilControl depthControl)
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}
+
+void GnmCommandBufferDraw::setBlendControl(uint32_t rtSlot, BlendControl blendControl)
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}
+
+void GnmCommandBufferDraw::setPrimitiveSetup(PrimitiveSetup reg)
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}
+
+void GnmCommandBufferDraw::setActiveShaderStages(ActiveShaderStages activeStages)
+{
+	throw std::logic_error("The method or operation is not implemented.");
+}
+
+void GnmCommandBufferDraw::setIndexSize(IndexSize indexSize, CachePolicy cachePolicy)
 {
 	throw std::logic_error("The method or operation is not implemented.");
 }

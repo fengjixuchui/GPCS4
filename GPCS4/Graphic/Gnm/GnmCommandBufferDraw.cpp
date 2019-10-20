@@ -193,38 +193,38 @@ void GnmCommandBufferDraw::setDepthRenderTarget(DepthRenderTarget const *depthTa
 
 void GnmCommandBufferDraw::setRenderTargetMask(uint32_t mask)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+
 }
 
-void GnmCommandBufferDraw::setDepthStencilControl(DepthStencilControl depthControl)
+void GnmCommandBufferDraw::setDepthStencilControl(DepthStencilControl depthStencilControl)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+	
 }
 
 void GnmCommandBufferDraw::setBlendControl(uint32_t rtSlot, BlendControl blendControl)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+
 }
 
 void GnmCommandBufferDraw::setPrimitiveSetup(PrimitiveSetup reg)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+
 }
 
 void GnmCommandBufferDraw::setActiveShaderStages(ActiveShaderStages activeStages)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+
 }
 
 void GnmCommandBufferDraw::setIndexSize(IndexSize indexSize, CachePolicy cachePolicy)
 {
-	throw std::logic_error("The method or operation is not implemented.");
+
 }
 
-// We be called on every frame start.
+// Will be called on every frame start.
 void GnmCommandBufferDraw::initializeDefaultHardwareState()
 {
-	m_context->initState();
+	m_context->beginRecording(m_cmd);
 }
 
 void GnmCommandBufferDraw::setPrimitiveType(PrimitiveType primType)

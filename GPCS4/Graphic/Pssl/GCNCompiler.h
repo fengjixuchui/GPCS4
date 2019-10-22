@@ -23,6 +23,7 @@
 #include "GCNParser/VOPInstruction.h"
 
 #include "../Gve/GveShader.h"
+#include "../Gve/GvePipelineLayout.h"
 #include "../SpirV/SpirvModule.h"
 
 #include <optional>
@@ -417,9 +418,9 @@ private:
 	void emitGprInitialize();
 	// For all shader types
 	void emitDclResourceBuffer();
-	void emitDclImmConstBuffer(const GcnResourceBuffer& res, uint32_t index);
-	void emitDclImmSampler(const GcnResourceBuffer& res, uint32_t index);
-	void emitDclImmResource(const GcnResourceBuffer& res, uint32_t index);
+	void emitDclImmConstBuffer(const GcnResourceBuffer& res);
+	void emitDclImmSampler(const GcnResourceBuffer& res);
+	void emitDclImmResource(const GcnResourceBuffer& res);
 
 	/////////////////////////////////////////////////////////
 	SpirvRegisterValue emitValueLoad(const SpirvRegisterPointer& reg);
@@ -753,6 +754,9 @@ private:
 
 	// spir-v id to literal constant value table
 	std::map<uint32_t, SpirvLiteralConstant> m_constValueTable;
+
+	// Used to record shader resource this shader declared using InputUsageSlot
+	std::vector<gve::GveResourceSlot> m_resourceSlots;
 
 };
 

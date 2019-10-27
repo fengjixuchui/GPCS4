@@ -23,6 +23,9 @@ SceGnmDriver::SceGnmDriver(std::shared_ptr<SceVideoOut>& videoOut):
 	// Logical device
 	m_device = m_physDevice->createLogicalDevice();
 	LOG_ASSERT(m_device != nullptr, "create logical device failed.");
+
+	m_pipeMgr = std::make_unique<gve::GvePipelineManager>(m_device.ptr());
+	m_resMgr = std::make_unique<gve::GveResourceManager>(m_device);
 }
 
 SceGnmDriver::~SceGnmDriver()
@@ -71,6 +74,7 @@ int SceGnmDriver::submitAndFlipCommandBuffers(uint32_t count,
 
 int SceGnmDriver::sceGnmSubmitDone(void)
 {
+	m_videoOut->processEvents();
 	return SCE_OK;
 }
 
@@ -117,7 +121,7 @@ void SceGnmDriver::createFrameBuffers(uint32_t count)
 	VkExtent2D extent = m_swapchain->extent();
 
 	GveRenderPassFormat format;
-	format.swapChainImageFormat = m_swapchain->imageFormat();
+	format.colorFormat = m_swapchain->imageFormat();
 	auto renderPass = m_device->createRenderPass(format);
 
 	for (uint32_t i = 0; i != count; ++i)
@@ -130,9 +134,13 @@ void SceGnmDriver::createFrameBuffers(uint32_t count)
 
 void SceGnmDriver::createContexts(uint32_t count)
 {
+	GveContextParam param;
+	param.pipeMgr = m_pipeMgr.get();
+	param.resMgr = m_resMgr.get();
+
 	for (uint32_t i = 0; i != count; ++i)
 	{
-		auto context = m_device->createContext();
+		auto context = m_device->createContext(param);
 		m_contexts.push_back(context);
 	}
 }

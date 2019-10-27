@@ -24,11 +24,13 @@
     <ClInclude Include="Common\FlagHelper.h" />
     <ClInclude Include="Common\GPCS4Log.h" />
     <ClInclude Include="Common\GPCS4Types.h" />
+    <ClInclude Include="Common\GveHash.h" />
     <ClInclude Include="Common\MacroHelper.h" />
     <ClInclude Include="Common\ReferenceCount.h" />
     <ClInclude Include="Common\Singleton.h" />
     <ClInclude Include="Common\BitHelper.h" />
     <ClInclude Include="Common\LikelyHelper.h" />
+    <ClInclude Include="Common\SyncHelper.h" />
     <ClInclude Include="elf-sce.h" />
     <ClInclude Include="Emulator\Emulator.h" />
     <ClInclude Include="Emulator\GameThread.h" />
@@ -59,6 +61,7 @@
     <ClInclude Include="Graphic\Gve\GveCommandBuffer.h" />
     <ClInclude Include="Graphic\Gve\GveCommon.h" />
     <ClInclude Include="Graphic\Gve\GveContext.h" />
+    <ClInclude Include="Graphic\Gve\GveDescriptor.h" />
     <ClInclude Include="Graphic\Gve\GveGraphicsPipeline.h" />
     <ClInclude Include="Graphic\Gve\GveImage.h" />
     <ClInclude Include="Graphic\Gve\GveLimit.h" />
@@ -237,6 +240,7 @@
     <ClCompile Include="Graphic\Gve\GveBuffer.cpp" />
     <ClCompile Include="Graphic\Gve\GveCommandBuffer.cpp" />
     <ClCompile Include="Graphic\Gve\GveContext.cpp" />
+    <ClCompile Include="Graphic\Gve\GveDescriptor.cpp" />
     <ClCompile Include="Graphic\Gve\GveDevice.cpp" />
     <ClCompile Include="Graphic\Gve\GveExtension.cpp" />
     <ClCompile Include="Graphic\Gve\GveFrameBuffer.cpp" />

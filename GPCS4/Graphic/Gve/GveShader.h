@@ -34,9 +34,13 @@ public:
 	GveShaderModule createShaderModule(const GveDevice* device,
 		const GveDescriptorSlotMap& slotMap);
 
+	PsslKey key();
+
+	bool operator ==(const GveShader& other);
+
 private:
 	void generateBindingIdOffsets(SpirvCodeBuffer& code);
-	void dumpShader();
+	void dumpShader(const SpirvCodeBuffer& code);
 	
 private:
 	VkShaderStageFlagBits m_stage;

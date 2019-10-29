@@ -3,7 +3,7 @@
 #include "GveCommon.h"
 #include "GveRenderState.h"
 #include "GveGraphicsPipeline.h"
-
+#include "GveFrameBuffer.h"
 #include "../Pssl/PsslBindingCalculator.h"
 
 #include <array>
@@ -13,7 +13,6 @@ namespace gve
 
 class GveDevice;
 class GveCommandBuffer;
-class GveFrameBuffer;
 class GveShader;
 class GveBuffer;
 class GveBufferView;
@@ -22,6 +21,7 @@ class GveImageView;
 class GveSampler;
 class GvePipelineManager;
 class GveResourceManager;
+class GveRenderPass;
 
 
 struct GveShaderResourceSlot
@@ -36,7 +36,7 @@ struct GveShaderResourceSlot
 struct GveContextParam
 {
 	GvePipelineManager* pipeMgr = nullptr;
-	GveResourceManager* resMgr = nullptr;
+	RcPtr<GveRenderPass> renderPass;
 };
 
 // This is our render context.
@@ -71,6 +71,8 @@ public:
 
 	void setBlendControl(const GveBlendControl& blendCtl);
 
+	void bindRenderTargets(const GveRenderTarget& target);
+
 	void bindShader(VkShaderStageFlagBits stage, const RcPtr<GveShader>& shader);
 
 	void bindIndexBuffer(const RcPtr<GveBuffer>& buffer, VkIndexType indexType);
@@ -87,16 +89,24 @@ public:
 
 	void drawIndex(uint32_t indexCount, uint32_t firstIndex);
 
+	void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+
+	void updateBuffer(const RcPtr<GveBuffer>& buffer, 
+		VkDeviceSize offset, VkDeviceSize size, const void* data);
+
 private:
 	RcPtr<GveDevice> m_device;
 	GvePipelineManager* m_pipeMgr;
 	GveResourceManager* m_resMgr;
+	RcPtr<GveRenderPass> m_renderPass;
 
 	RcPtr<GveCommandBuffer> m_cmd;
 
 	GveGraphicsPipelineShaders m_shaders;
 	GveRenderState m_state;
 	GveContextFlag m_flag;
+
+	GveRenderTarget m_renderTarget;
 
 	std::array<GveShaderResourceSlot, pssl::PsslBindingIndexMax> m_res;
 

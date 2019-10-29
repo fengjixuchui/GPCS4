@@ -8,7 +8,7 @@
 #include "GveImage.h"
 #include "GveSampler.h"
 #include "GveDevice.h"
-
+#include "GveRenderPass.h"
 
 namespace gve
 {;
@@ -20,7 +20,7 @@ RcPtr<gve::GveDescriptorPool> GveContex::s_descPool;
 GveContex::GveContex(const RcPtr<GveDevice>& device, const GveContextParam& param) :
 	m_device(device),
 	m_pipeMgr(param.pipeMgr),
-	m_resMgr(param.resMgr)
+	m_renderPass(param.renderPass)
 {
 }
 
@@ -117,6 +117,11 @@ void GveContex::setBlendControl(const GveBlendControl& blendCtl)
 	m_state.cb.blendConstants[1] = 0.0f;
 	m_state.cb.blendConstants[2] = 0.0f;
 	m_state.cb.blendConstants[3] = 0.0f;
+}
+
+void GveContex::bindRenderTargets(const GveRenderTarget& target)
+{
+	m_renderTarget = target;
 }
 
 void GveContex::bindShader(VkShaderStageFlagBits stage, const RcPtr<GveShader>& shader)
@@ -252,8 +257,46 @@ void GveContex::drawIndex(uint32_t indexCount, uint32_t firstIndex)
 	}
 
 
+	VkRenderPassBeginInfo renderPassInfo = {};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = m_renderPass->handle();
+	renderPassInfo.framebuffer = m_renderTarget.frameBuffer->handle();
+	renderPassInfo.renderArea.offset = { 0, 0 };
+	renderPassInfo.renderArea.extent = m_renderTarget.frameBuffer->extent();
+
+	m_cmd->cmdBeginRenderPass(&renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	m_cmd->cmdBindPipeline(VK_PIPELINE_BIND_POINT_GRAPHICS, s_pipeline);
+
+	VkBuffer vertexBuffers[] = { m_state.vi.vertexBuffers[0]->handle() };
+	VkDeviceSize offsets[] = { 0 };
+	m_cmd->cmdBindVertexBuffers(0, 1, vertexBuffers, offsets);
+
+	m_cmd->cmdBindIndexBuffer(m_state.vi.indexBuffer->handle(), 0, m_state.vi.indexType);
+
+	m_cmd->cmdBindDescriptorSet(VK_PIPELINE_BIND_POINT_GRAPHICS, s_layout->pipelineLayout(), m_descSet, 0, nullptr);
+
+	m_cmd->cmdDrawIndexed(m_state.vi.indexBuffer->getGnmBuffer()->getSize(), 1, 0, 0, 0);
+
+	m_cmd->cmdEndRenderPass();
 }
 
 
+void GveContex::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
+{
+	VkCommandBuffer commandBuffer = m_cmd->cmdBeginSingleTimeCommands();
+
+	VkBufferCopy copyRegion = { 0 };
+	copyRegion.size = size;
+	m_cmd->cmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+	auto queues = m_device->queues();
+	m_cmd->cmdEndSingleTimeCommands(commandBuffer, queues.graphics.queueHandle);
+}
+
+void GveContex::updateBuffer(const RcPtr<GveBuffer>& buffer, 
+	VkDeviceSize offset, VkDeviceSize size, const void* data)
+{
+
+}
 
 } // namespace gve

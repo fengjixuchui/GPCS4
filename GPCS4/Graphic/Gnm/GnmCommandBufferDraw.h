@@ -18,7 +18,10 @@ private:
 	typedef std::vector<pssl::PsslShaderResource> UDSTVector;
 
 public:
-	GnmCommandBufferDraw(RcPtr<gve::GveContex>& context, const gve::GveRenderTarget& renderTarget);
+	GnmCommandBufferDraw(const RcPtr<gve::GveDevice>& device, 
+		const RcPtr<gve::GveContex>& context,
+		gve::GveResourceManager* resMgr,
+		const gve::GveRenderTarget& renderTarget);
 	virtual ~GnmCommandBufferDraw();
 
 	virtual void initializeDefaultHardwareState() override;
@@ -104,6 +107,10 @@ public:
 
 private:
 	uint32_t* getFetchShaderCode(void* vsCode);
+	void onSetUserDataRegister(ShaderStage stage, uint32_t startSlot, 
+		const uint32_t* data, uint32_t numDwords);
+
+	void insertUniqueShaderResource(UDSTVector& container, uint32_t startSlot, pssl::PsslShaderResource& shaderRes);
 
 private:
 

@@ -8,13 +8,18 @@
 #include "GnmDepthRenderTarget.h"
 
 #include "../Gve/GveContext.h"
+#include "../Gve/GveResourceManager.h"
+
 
 class GnmCommandBuffer
 {
 public:
-	GnmCommandBuffer(RcPtr<gve::GveContex>& context);
+	GnmCommandBuffer(const RcPtr<gve::GveDevice>& device, 
+		const RcPtr<gve::GveContex>& context,
+		gve::GveResourceManager* resMgr);
 	virtual ~GnmCommandBuffer();
 
+	RcPtr<gve::GveCommandBuffer> getCmdBuffer();
 	// Implement these one by one...
 
 	// Note:
@@ -325,7 +330,9 @@ public:
 	//static bool readDispatchDrawAcbSubmitMarker(uint32_t const *pAcbSubmitMarker, uint32_t *out_pSizeofAcbSegment, uint32_t *out_pPipe, uint32_t *out_pQueue, void const** out_ppAcbSegmentNext);
 
 protected:
+	RcPtr<gve::GveDevice> m_device;
 	RcPtr<gve::GveContex> m_context;
+	gve::GveResourceManager* m_resourceManager;
 	RcPtr<gve::GveCommandBuffer> m_cmd;
 	
 private:

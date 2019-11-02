@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GPCS4Common.h"
+#include "GnmCommon.h"
 #include "GnmCommandBuffer.h"
 #include "../Pssl/PsslShaderModule.h"
 #include "../Gve/GveCommandBuffer.h"
@@ -123,6 +123,8 @@ private:
 
 	RcPtr<gve::GveShader> m_vsShader;
 	RcPtr<gve::GveShader> m_psShader;
+
+	IndexSize m_indexSize = kIndexSize16;
 
 };
 

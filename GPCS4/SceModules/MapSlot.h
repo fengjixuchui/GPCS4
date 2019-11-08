@@ -5,21 +5,33 @@
 #include <mutex>
 #include <algorithm>
 
-template <typename T, typename EmptyFuncT>
+
+template <typename T> 
+bool MapSlotDefaultEmpty(const T& item)
+{
+	return (item == 0);
+}
+
+template <typename T>
+bool MapSlotDefaultEqual(const T& lhs, const T& rhs)
+{
+	return (lhs == rhs);
+}
+
+template <typename T, 
+	bool (*EmptylFunc)(const T&) = MapSlotDefaultEmpty<T>,
+	bool (*EqualFunc)(const T&, const T&) = MapSlotDefaultEqual>
 class MapSlot
 {
 public:
-	MapSlot(const uint nSize, EmptyFuncT func):
-		m_vtArray(nSize),
-		m_funcIsItemEmpty(func)
-	{
 
+	MapSlot()
+	{
 	}
 
-	MapSlot(EmptyFuncT func):
-		m_funcIsItemEmpty(func)
+	MapSlot(const uint32_t nSize):
+		m_vtArray(nSize)
 	{
-
 	}
 
 	~MapSlot()
@@ -28,7 +40,13 @@ public:
 		m_vtArray.clear();
 	}
 
-	void Resize(const uint nSize)
+	uint32_t Size()
+	{
+		std::lock_guard<std::mutex> lock(m_mutex);
+		return m_vtArray.size();
+	}
+
+	void Resize(const uint32_t nSize)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 		m_vtArray.resize(nSize);
@@ -37,13 +55,13 @@ public:
 
 	// we start at 1 for convenience,
 	// because 0 means SCE_OK or invalid value for some sce functions
-	uint GetEmptySlotIndex()
+	uint32_t GetEmptySlotIndex()
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
-		uint nIdx = 0;
-		for (uint i = 1; i != m_vtArray.size(); ++i)
+		uint32_t nIdx = 0;
+		for (uint32_t i = 1; i != m_vtArray.size(); ++i)
 		{
-			if (!m_funcIsItemEmpty(m_vtArray[i]))
+			if (!EmptylFunc(m_vtArray[i]))
 			{
 				continue;
 			}
@@ -53,35 +71,25 @@ public:
 		return nIdx;
 	}
 
-	uint GetItemIndex(const T& item)
+	uint32_t GetItemIndex(const T& item)
 	{
-		auto equal = [&item](T& ele) { return item == ele; };
-
-		std::lock_guard<std::mutex> lock(m_mutex);
-		auto it = std::find_if(m_vtArray.begin(), m_vtArray.end(), equal);
-		return it != m_vtArray.end() ? std::distance(m_vtArray.begin(), it) : 0;
-	}
-
-	template<typename EqualFuncT>
-	uint GetItemIndex(const T& item, EqualFuncT equal)
-	{
-		auto pred = [&item, &equal](T& ele) { return equal(item, ele); };
+		auto pred = [&item](T& ele) { return EqualFunc(item, ele); };
 		std::lock_guard<std::mutex> lock(m_mutex);
 		auto it = std::find_if(m_vtArray.begin(), m_vtArray.end(), pred);
 		return it != m_vtArray.end() ? std::distance(m_vtArray.begin(), it) : 0;
 	}
 
-	T& GetItemAt(const uint i)
+	T& GetItemAt(const uint32_t i)
 	{
 		return (*this)[i];
 	}
 
-	void SetItemAt(const uint i, T& item)
+	void SetItemAt(const uint32_t i, T& item)
 	{
 		(*this)[i] = item;
 	}
 
-	T& operator[](const uint i)
+	T& operator[](const uint32_t i)
 	{
 		std::lock_guard<std::mutex> lock(m_mutex);
 		LOG_ASSERT((i < m_vtArray.size()), "index exceed max item size %d/%d", i, m_vtArray.size());
@@ -91,6 +99,5 @@ public:
 private:
 	std::mutex m_mutex;
 	std::vector<T> m_vtArray;
-	std::function<EmptyFuncT> m_funcIsItemEmpty;
 };
 

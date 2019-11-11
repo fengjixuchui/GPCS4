@@ -1,4 +1,4 @@
-# GPCS4
+# GPCS4 linker dev branch
 
 A Playstation 4 emulator just begin.  
 A project for fun, and technical research.  
@@ -6,6 +6,11 @@ A project for fun, and technical research.
 The only reason I start this project is learning 3D graphics, nothing serious.
 
 ## Latest progress
+
+![Demo Basic Quad](https://github.com/Inori/GPCS4/blob/master/Misc/demo_basic_quad.gif)  
+First correct image rendered, although this is a 2D image demo, it's actuall rendered in 3D pipeline.  
+There're still some hardcode test code, but with more design, and most important, this time with our shader translator, no hand write shaders anymore.  
+Next I'll focus on Nier and improve the graphics implementation.
 
 ![Demo](https://github.com/Inori/GPCS4/blob/master/Misc/demo.gif)  
 
@@ -57,9 +62,19 @@ Visual Studio 2017
 [LLVM Compiler Toolchain Extension](https://marketplace.visualstudio.com/items?itemName=LLVMExtensions.llvm-toolchain)  
 [LunarG Vulkan SDK](https://www.lunarg.com/vulkan-sdk/)
 
+## Credits
+[DXVK](https://github.com/doitsujin/dxvk)  
+[uplift](https://github.com/idc/uplift)
+
 ## License
 [GPL-3.0](https://github.com/Inori/GPCS4/blob/master/LICENSE)  
-_But commercial usage is NOT permitted._
+
+## _Apology_  
+There is another ps4 emulator project call ps4uv, which is close source and private.
+For some historical reason I got their code, and because of my careless, I let one of our developer see the code without their permission. I apologize for what I've done sincerely.  
+There're some points of details of our linker code are borrowed from ps4uv's linker module's idea, and I've deleted our linker branch, and after we delete those points and reform our code, I'll make it online again, never mean to stole anyone's code.  
+Apologize again. Asuka
+
 
 
 

@@ -36,12 +36,11 @@ size_t GveRenderPassFormat::hash() const
 
 ///
 
-GveRenderPass::GveRenderPass(const RcPtr<GveDevice>& device, GveRenderPassFormat& fmt):
+GveRenderPass::GveRenderPass(const RcPtr<GveDevice>& device, const GveRenderPassFormat& fmt):
 	m_device(device),
 	m_format(fmt),
 	m_default(createRenderPass(GveRenderPassOps()))
 {
-	createRenderPass(fmt);
 }
 
 GveRenderPass::~GveRenderPass()
@@ -53,7 +52,7 @@ GveRenderPass::~GveRenderPass()
 		vkDestroyRenderPass(*m_device, i.handle, nullptr);
 	}
 }
-
+ 
 
 bool GveRenderPass::hasCompatibleFormat(const GveRenderPassFormat& fmt) const
 {
@@ -62,17 +61,31 @@ bool GveRenderPass::hasCompatibleFormat(const GveRenderPassFormat& fmt) const
 
 VkRenderPass GveRenderPass::getHandle(const GveRenderPassOps& ops)
 {
-	std::lock_guard<Spinlock> lock(m_mutex);
-
-	for (const auto& i : m_instances) 
+	VkRenderPass rp = VK_NULL_HANDLE;
+	do 
 	{
-		if (compareOps(i.ops, ops))
-			return i.handle;
-	}
+		std::lock_guard<Spinlock> lock(m_mutex);
 
-	VkRenderPass handle = this->createRenderPass(ops);
-	m_instances.push_back({ ops, handle });
-	return handle;
+		for (const auto& i : m_instances)
+		{
+			if (!compareOps(i.ops, ops))
+			{
+				continue;
+			}
+			rp = i.handle;
+			break;
+		}
+
+		if (rp != VK_NULL_HANDLE)
+		{
+			break;
+		}
+
+		rp = createRenderPass(ops);
+		m_instances.push_back({ ops, rp });
+
+	} while (false);
+	return rp;
 }
 
 VkRenderPass GveRenderPass::createRenderPass(const GveRenderPassOps& ops)

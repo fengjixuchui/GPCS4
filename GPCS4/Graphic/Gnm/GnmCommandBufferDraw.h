@@ -20,8 +20,7 @@ private:
 public:
 	GnmCommandBufferDraw(const RcPtr<gve::GveDevice>& device, 
 		const RcPtr<gve::GveContex>& context,
-		gve::GveResourceManager* resMgr,
-		const gve::GveRenderTarget& renderTarget);
+		gve::GveResourceManager* resMgr);
 	virtual ~GnmCommandBufferDraw();
 
 	virtual void initializeDefaultHardwareState() override;
@@ -113,8 +112,6 @@ private:
 	void insertUniqueShaderResource(UDSTVector& container, uint32_t startSlot, pssl::PsslShaderResource& shaderRes);
 
 private:
-
-	gve::GveRenderTarget m_renderTarget;
 
 	void* m_vsCode;
 	void* m_psCode;

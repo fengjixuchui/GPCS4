@@ -2,7 +2,8 @@
 
 #include "GveCommon.h"
 #include "SyncHelper.h"
-
+#include "GveLimit.h"
+#include "GveHash.h"
 #include <mutex>
 
 namespace gve
@@ -109,7 +110,7 @@ class GveRenderPass : public RcObject
 public:
 	GveRenderPass(
 		const RcPtr<GveDevice>& device,
-		GveRenderPassFormat& fmt);
+		const GveRenderPassFormat& fmt);
 
 	~GveRenderPass();
 

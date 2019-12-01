@@ -5,6 +5,11 @@
 #include "GveImage.h"
 #include "GveSampler.h"
 #include "GveSwapChain.h"
+#include "GveContext.h"
+#include "GveFrameBuffer.h"
+#include "GvePhysicalDevice.h"
+
+#include "../Sce/SceVideoOut.h"
 
 namespace gve
 {;
@@ -79,7 +84,7 @@ RcPtr<GveBuffer> GveDevice::createBuffer(const GveBufferCreateInfo& info, VkMemo
 	return m_resObjects.resourceManager().createBuffer(info, memoryType);
 }
 
-RcPtr<GveBuffer> GveDevice::createBufferVsharp(const GveBufferCreateInfo& info, VkMemoryPropertyFlags memoryType, uint64_t key)
+RcPtr<GveBuffer> GveDevice::createOrGetBufferVsharp(const GveBufferCreateInfo& info, VkMemoryPropertyFlags memoryType, uint64_t key)
 {
 	return m_resObjects.resourceManager().createBufferVsharp(info, memoryType, key);
 }
@@ -94,7 +99,7 @@ RcPtr<GveImage> GveDevice::createImage(const GveImageCreateInfo& info, VkMemoryP
 	return m_resObjects.resourceManager().createImage(info, memoryType);
 }
 
-RcPtr<GveImage> GveDevice::createImageTsharp(const GveImageCreateInfo& info, VkMemoryPropertyFlags memoryType, uint64_t key)
+RcPtr<GveImage> GveDevice::createOrGetImageTsharp(const GveImageCreateInfo& info, VkMemoryPropertyFlags memoryType, uint64_t key)
 {
 	return m_resObjects.resourceManager().createImageTsharp(info, memoryType, key);
 }
@@ -109,7 +114,7 @@ RcPtr<GveImageView> GveDevice::createImageView(const RcPtr<GveImage>& image, con
 	return m_resObjects.resourceManager().createImageView(image, createInfo);
 }
 
-RcPtr<GveImageView> GveDevice::createImageViewTsharp(const RcPtr<GveImage>& image, const GveImageViewCreateInfo& createInfo, uint64_t key)
+RcPtr<GveImageView> GveDevice::createOrGetImageViewTsharp(const RcPtr<GveImage>& image, const GveImageViewCreateInfo& createInfo, uint64_t key)
 {
 	return m_resObjects.resourceManager().createImageViewTsharp(image, createInfo, key);
 }
@@ -124,7 +129,7 @@ RcPtr<GveSampler> GveDevice::createSampler(const GveSamplerCreateInfo& info)
 	return m_resObjects.resourceManager().createSampler(info);
 }
 
-RcPtr<GveSampler> GveDevice::createSamplerSsharp(const GveSamplerCreateInfo& info, uint64_t key)
+RcPtr<GveSampler> GveDevice::createOrGetSamplerSsharp(const GveSamplerCreateInfo& info, uint64_t key)
 {
 	return m_resObjects.resourceManager().createSamplerSsharp(info, key);
 }

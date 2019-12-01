@@ -1,22 +1,27 @@
 #pragma once
 
 #include "GveCommon.h"
-#include "GvePhysicalDevice.h"
-#include "GveFrameBuffer.h"
-#include "GveContext.h"
-#include "GveMemory.h"
+#include "GveDeviceInfo.h"
 #include "GveResourceObjects.h"
 
-#include "../Sce/SceVideoOut.h"
+namespace sce
+{
+	class SceVideoOut;
+}
 
 namespace gve
 {;
+
+struct GveRenderTargets;
 
 class GveCmdList;
 class GveDescriptorPool;
 class GveBuffer;
 class GveImage;
 class GveSwapChain;
+class GveContex;
+class GveFrameBuffer;
+class GvePhysicalDevice;
 
 struct GveDeviceQueue 
 {
@@ -33,6 +38,7 @@ struct GveDeviceQueueSet
 
 class GveDevice : public RcObject
 {
+	friend class GveContex;
 public:
 	GveDevice(VkDevice device, const RcPtr<GvePhysicalDevice>& phyDevice);
 	~GveDevice();
@@ -59,7 +65,7 @@ public:
 		const GveBufferCreateInfo&	info, 
 		VkMemoryPropertyFlags		memoryType);
 
-	RcPtr<GveBuffer> createBufferVsharp(
+	RcPtr<GveBuffer> createOrGetBufferVsharp(
 		const GveBufferCreateInfo&	info,
 		VkMemoryPropertyFlags		memoryType,
 		uint64_t					key);
@@ -72,7 +78,7 @@ public:
 		const GveImageCreateInfo&	info, 
 		VkMemoryPropertyFlags		memoryType);
 
-	RcPtr<GveImage> createImageTsharp(
+	RcPtr<GveImage> createOrGetImageTsharp(
 		const GveImageCreateInfo&	info,
 		VkMemoryPropertyFlags		memoryType,
 		uint64_t					key);
@@ -83,7 +89,7 @@ public:
 		const RcPtr<GveImage>&            image,
 		const GveImageViewCreateInfo&     createInfo);
 
-	RcPtr<GveImageView> createImageViewTsharp(
+	RcPtr<GveImageView> createOrGetImageViewTsharp(
 		const RcPtr<GveImage>&            image,
 		const GveImageViewCreateInfo&     createInfo,
 		uint64_t						  key);
@@ -94,7 +100,7 @@ public:
 
 	RcPtr<GveSampler> createSampler(const GveSamplerCreateInfo& info);
 
-	RcPtr<GveSampler> createSamplerSsharp(
+	RcPtr<GveSampler> createOrGetSamplerSsharp(
 		const GveSamplerCreateInfo&		info, 
 		uint64_t						key);
 

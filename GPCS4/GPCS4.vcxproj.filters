@@ -11,9 +11,6 @@
     <Filter Include="Source Files\Platform">
       <UniqueIdentifier>{78222735-0fe6-4c0d-b76a-7f5c113ee9db}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Emulator">
-      <UniqueIdentifier>{9a707c88-79d8-4c96-ad6c-658b1e5f496c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="SceModules">
       <UniqueIdentifier>{103e400e-fb5e-4330-87fa-00878384bc7e}</UniqueIdentifier>
     </Filter>
@@ -181,6 +178,9 @@
     </Filter>
     <Filter Include="Source Files\Util">
       <UniqueIdentifier>{4451038b-f42d-4af5-b678-870a988e8194}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Emulator">
+      <UniqueIdentifier>{9a707c88-79d8-4c96-ad6c-658b1e5f496c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -856,6 +856,15 @@
     <ClInclude Include="Util\UtilInclude.h">
       <Filter>Source Files\Util</Filter>
     </ClInclude>
+    <ClInclude Include="Graphic\Pssl\GCNStateRegister.h">
+      <Filter>Source Files\Graphic\Pssl</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphic\Pssl\GCNSpirvTypes.h">
+      <Filter>Source Files\Graphic\Pssl</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphic\Pssl\PsslContants.h">
+      <Filter>Source Files\Graphic\Pssl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Loader\EbootObject.cpp">
@@ -1260,9 +1269,6 @@
     <ClCompile Include="Graphic\Gnm\GnmCommandBuffer.cpp">
       <Filter>Source Files\Graphic\Gnm</Filter>
     </ClCompile>
-    <ClCompile Include="Graphic\Gnm\GnmCommandBufferDraw.cpp">
-      <Filter>Source Files\Graphic\Gnm</Filter>
-    </ClCompile>
     <ClCompile Include="Graphic\Gve\GveDevice.cpp">
       <Filter>Source Files\Graphic\Gve</Filter>
     </ClCompile>
@@ -1508,6 +1514,12 @@
     </ClCompile>
     <ClCompile Include="Graphic\Pssl\GCNInstructionIterator.cpp">
       <Filter>Source Files\Graphic\Pssl</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphic\Pssl\GCNStateRegister.cpp">
+      <Filter>Source Files\Graphic\Pssl</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphic\Gnm\GnmCommandBufferDraw.cpp">
+      <Filter>Source Files\Graphic\Gnm</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

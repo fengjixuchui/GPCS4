@@ -178,3 +178,11 @@ int PS4API sceKernelIsAddressSanitizerEnabled(void)
 	LOG_FIXME("Not implemented");
 	return 0;
 }
+
+
+void* PS4API scek_mmap(void* start, size_t length, uint32_t prot, uint32_t flags, int fd, int64_t offset) 
+{
+	auto addr = UtilMemory::VMMap(start, length, prot, flags, fd, offset);
+	LOG_SCE_TRACE("%p, 0x%lx, 0x%x, 0x%x, %d, %ld = %p", start, length, prot, flags, fd, offset, addr);
+	return addr;
+}

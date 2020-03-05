@@ -12,6 +12,12 @@ LOG_CHANNEL(SceModules.SceLibkernel);
 // library: libkernel
 //////////////////////////////////////////////////////////////////////////
 
+int PS4API scek_get_authinfo(void) 
+{
+	LOG_FIXME("Not implemented");
+	return 0;
+}
+
 int* PS4API __error(void)
 {
 	LOG_SCE_DUMMY_IMPL();
@@ -45,16 +51,13 @@ int PS4API _sceKernelSetThreadAtexitCount()
 	return SCE_OK;
 }
 
+
 int PS4API _sceKernelSetThreadAtexitReport()
 {
 	LOG_FIXME("Not implemented");
 	return SCE_OK;
 }
 
-int PS4API sceKernelClockGettime(sce_clockid_t clk_id, struct sce_timespec * tp)
-{
-	return scek_clock_gettime(clk_id, tp);
-}
 
 int PS4API sceKernelGetCpumode(void)
 {
@@ -225,6 +228,18 @@ int PS4API sceKernelGetProcessType(int pid)
 	return SCE_OK;
 }
 
+int PS4API sceKernelGetCurrentCpu(void)
+{
+	LOG_FIXME("Not implemented");
+	return 0;
+}
+
+
+PS4API int scek_socket(int domain, int type, int protocol)
+{
+	LOG_FIXME("Not implemented");
+	return -1;
+}
 
 //////////////////////////////////////////////////////////////////////////
 // library: libSceCoredump
@@ -323,17 +338,19 @@ int PS4API scek_sem_destroy(void)
 }
 
 
-int PS4API scek_sem_init(void)
+int PS4API scek_sem_init(sem_t* sem, int pshared, unsigned int value)
 {
-	LOG_FIXME("Not implemented");
-	return SCE_OK;
+	int iRet = sem_init(sem, pshared, value);
+	LOG_SCE_TRACE("sem = %p, pshared = %d, value = %d, ret = %d", sem, pshared, value, iRet);
+	return iRet;
 }
 
 
-int PS4API scek_sem_post(void)
+int PS4API scek_sem_post(sem_t* sem)
 {
-	LOG_FIXME("Not implemented");
-	return SCE_OK;
+	int iRet = sem_post(sem);
+	LOG_SCE_TRACE("sem = %p, ret = %d", sem, iRet);
+	return iRet;
 }
 
 
@@ -344,12 +361,20 @@ int PS4API scek_sem_timedwait(void)
 }
 
 
-int PS4API scek_sem_wait(void)
+int PS4API scek_sem_wait(sem_t* sem)
 {
-	LOG_FIXME("Not implemented");
-	return SCE_OK;
+	int iRet = sem_wait(sem);
+	LOG_SCE_TRACE("sem = %p, ret = %d", sem, iRet);
+	return iRet;
 }
 
+
+int PS4API scek_sem_getvalue(sem_t* sem, int* sval)
+{
+	int iRet = sem_getvalue(sem, sval);
+	LOG_SCE_TRACE("sem = %p, sval = %p, ret = %d", sem, sval, iRet);
+	return iRet;
+}
 
 int PS4API scek_send(void)
 {
